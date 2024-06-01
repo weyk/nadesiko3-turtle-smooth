@@ -1,0 +1,56 @@
+{
+  "name": "nadesiko3-turtle-smooth",
+  "version": "1.0.0",
+  "description": "Smooth turtle graphics for nadesiko3",
+  "type": "module",
+  "main": "lib/plugin_turtle_smooth.js",
+  "scripts": {
+    "build": "tsc",
+    "tsc": "tsc --watch",
+    "eslint": "eslint src/*.ts",
+    "eslint:fix": "eslint . --ext ts --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/weyk/nadesiko3-turtle-smooth.git"
+  },
+  "keywords": [
+    "script",
+    "Japanse Programming Language",
+    "Nadesiko",
+    "日本語プログラミング言語",
+    "なでしこ",
+    "タートルグラフィクス"
+  ],
+  "files": [
+    "src",
+    "lib"
+  ],
+  "author": "weyk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/weyk/nadesiko3-turtle-smooth/issues"
+  },
+  "browserslist": [
+    "> 0.5%",
+    "> 0.5% in JP",
+    "last 2 versions",
+    "Firefox ESR",
+    "not dead"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^9.1.1",
+    "@types/node": "^20.12.7",
+    "eslint": "^8.57.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.1.1",
+    "fetch-mock": "^9.11.0",
+    "nadesiko3": "^3.6.7",
+    "nadesiko3core": "^3.6.4",
+    "standard": "^17.1.0",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.8.0"
+  }
+}
