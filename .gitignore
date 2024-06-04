@@ -1,5 +1,6 @@
 # exclude dir
 package-lock.json
+/tmp
 
 # Logs
 logs
