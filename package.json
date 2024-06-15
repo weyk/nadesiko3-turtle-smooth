@@ -5,6 +5,8 @@
   "type": "module",
   "main": "lib/plugin_turtle_smooth.js",
   "scripts": {
+    "start": "node demo/index_lite.js",
+    "test": "node --test",
     "build": "tsc && rollup -c",
     "tsc": "tsc --watch",
     "eslint": "eslint src/*.ts",
@@ -24,7 +26,8 @@
   ],
   "files": [
     "src",
-    "lib"
+    "lib",
+    "demo"
   ],
   "author": "weyk",
   "license": "MIT",
