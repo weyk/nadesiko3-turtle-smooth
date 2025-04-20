@@ -36,21 +36,22 @@ export class Runner {
         this.jobs.push(command)
         return promise
     }
+
     hasJob (): boolean {
         return this.jobs.length > 0 || this.currentJob !== null || this.jobStep !== 'fetch'
     }
 
-    run (time:number, waitTime: number, immediateRun: boolean):number {
-        while (time > 0 && this.hasJob()) {
+    run (time:number, waitTime: number, immediateRun: boolean, immediateRunAction: boolean):number {
+        while (((immediateRun && immediateRunAction) || time > 0) && this.hasJob()) {
             switch (this.jobStep) {
             case 'fetch':
                 this.fetch()
                 break
             case 'setup':
-                this.setup(waitTime, immediateRun)
+                this.setup(waitTime, immediateRun, immediateRunAction)
                 break
             case 'tick':
-                time = this.tick(time, immediateRun)
+                time = this.tick(time, immediateRun, immediateRunAction)
                 break
             case 'end':
                 time = this.end(time)
@@ -66,33 +67,33 @@ export class Runner {
         this.jobStep = this.currentJob !== null ? 'setup' : 'fetch'
     }
 
-    private setup (waitTime: number, immediateRun: boolean):void {
+    private setup (waitTime: number, immediateRun: boolean, immediateRunAction: boolean):void {
         if (!this.currentJob) {
             this.jobStep = 'fetch'
             return
         }
-        if (!immediateRun && this.currentJob.useAnimation(this.tt)) {
-            this.animationRunner.jobs.push(...this.currentJob.generateAnimationJob(this.tt))
+        if (!immediateRunAction && this.currentJob.useAnimation(this.tt)) {
+            this.animationRunner.add(this.currentJob.generateAnimationJob(this.tt))
         } else {
-            this.currentJob.setup(this.tt, waitTime , immediateRun)
+            this.currentJob.setup(this.tt, waitTime, immediateRun)
         }
         this.jobStep = 'tick'
     }
 
-    private tick (time: number, immediateRun: boolean): number {
+    private tick (time: number, immediateRun: boolean, immediateRunAction: boolean): number {
         if (!this.currentJob) {
             this.jobStep = 'fetch'
             return time
         }
         let remainTime:number
         if (this.animationRunner.hasJob()) {
-            remainTime = this.animationRunner.run(time)
+            remainTime = this.animationRunner.run(time, immediateRunAction)
             if (!this.animationRunner.hasJob()) {
                 this.jobStep = 'end'
             }
         } else {
             remainTime = this.currentJob.tick(this.tt, time, immediateRun)
-            if (remainTime > 0) {
+            if (remainTime > 0 || immediateRun) {
                 this.jobStep = 'end'
             }
         }

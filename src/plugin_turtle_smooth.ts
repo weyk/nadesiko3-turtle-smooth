@@ -2,7 +2,6 @@
  * smooth Turtle Graphics for Web browser (nadesiko3)
  * plugin_turtle_promise.ts
  */
-// import { turtleImage, elephantImage, pandaImage } from 'nadesiko3/src/plugin_turtle_images.mjs'
 
 import { TurtleSmoothSystem } from './turtle_system.js'
 import { TurtleSmooth } from './turtle.js'
@@ -13,7 +12,7 @@ import * as Command from './command/command.js'
 const turtleImageURL = 'https://n3s.nadesi.com/image.php?f=64.png'
 const elephantImageURL = ''
 const pandaImageURL = ''
-const cancerImageURL = ''
+const cancerImageURL = 'https://n3s.nadesi.com/image.php?f=533.png'
 const ebiImageURL = ''
 const sharkImageURL = ''
 
@@ -88,7 +87,7 @@ const PluginTurtleSmooth: NakoPluginObject = {
         fn: function (sys: NakoSystem): number {
             const turtlesmooth = TurtleSmoothSystem.getTurtleSmooth(sys)
             const imageUrl = sys.__getSysVar('カメ画像URL')
-            return turtlesmooth.createTurtle(imageUrl)
+            return turtlesmooth.createTurtle(imageUrl, 'カメ')
         }
     },
     'ゾウ作成': { // @ゾウの画像でタートルグラフィックスを開始してIDを返す // @ぞうさくせい
@@ -97,8 +96,8 @@ const PluginTurtleSmooth: NakoPluginObject = {
         pure: true,
         fn: function (sys: NakoSystem): number {
             const turtlesmooth = TurtleSmoothSystem.getTurtleSmooth(sys)
-            const imageUrl = elephantImageURL
-            return turtlesmooth.createTurtle(imageUrl)
+            const imageUrl = sys.__getSysVar('ゾウ画像URL')
+            return turtlesmooth.createTurtle(imageUrl, 'カメ')
         }
     },
     'パンダ作成': { // @パンダの画像でタートルグラフィックスを開始してIDを返す // @ぱんださくせい
@@ -107,8 +106,8 @@ const PluginTurtleSmooth: NakoPluginObject = {
         pure: true,
         fn: function (sys: NakoSystem): number {
             const turtlesmooth = TurtleSmoothSystem.getTurtleSmooth(sys)
-            const imageUrl = pandaImageURL
-            return turtlesmooth.createTurtle(imageUrl)
+            const imageUrl = sys.__getSysVar('パンダ画像URL')
+            return turtlesmooth.createTurtle(imageUrl, 'カメ')
         }
     },
     'カニ作成': { // @カニの画像でタートルグラフィックスを開始してIDを返す // @かにさくせい
@@ -117,7 +116,7 @@ const PluginTurtleSmooth: NakoPluginObject = {
         pure: true,
         fn: function (sys: NakoSystem): number {
             const turtlesmooth = TurtleSmoothSystem.getTurtleSmooth(sys)
-            const imageUrl = cancerImageURL
+            const imageUrl = sys.__getSysVar('カニ画像URL')
             return turtlesmooth.createTurtle(imageUrl, 'カニ')
         }
     },
@@ -127,7 +126,7 @@ const PluginTurtleSmooth: NakoPluginObject = {
         pure: true,
         fn: function (sys: NakoSystem): number {
             const turtlesmooth = TurtleSmoothSystem.getTurtleSmooth(sys)
-            const imageUrl = ebiImageURL
+            const imageUrl = sys.__getSysVar('カメ画像URL')
             return turtlesmooth.createTurtle(imageUrl, 'エビ')
         }
     },
@@ -137,7 +136,7 @@ const PluginTurtleSmooth: NakoPluginObject = {
         pure: true,
         fn: function (sys: NakoSystem): number {
             const turtlesmooth = TurtleSmoothSystem.getTurtleSmooth(sys)
-            const imageUrl = sharkImageURL
+            const imageUrl = sys.__getSysVar('サメ画像URL')
             return turtlesmooth.createTurtle(imageUrl, 'サメ')
         }
     },
@@ -152,6 +151,11 @@ const PluginTurtleSmooth: NakoPluginObject = {
     },
     'カメ描画先': { type: 'var', value: '#turtle_cv' }, // @かめびょうがさき
     'カメ画像URL': { type: 'var', value: turtleImageURL }, // @かめがぞうURL
+    'ゾウ画像URL': { type: 'var', value: elephantImageURL }, // @ぞうがぞうURL
+    'パンダ画像URL': { type: 'var', value: pandaImageURL }, // @ぱんだがぞうURL
+    'カニ画像URL': { type: 'var', value: cancerImageURL }, // @かにがぞうURL
+    'エビ画像URL': { type: 'var', value: ebiImageURL }, // @えびがぞうURL
+    'サメ画像URL': { type: 'var', value: sharkImageURL }, // @さめがぞうURL
     'カメ画像変更': { // @カメの画像をURLに変更する // @かめがぞうへんこう
         type: 'func',
         josi: [['に', 'へ']],
@@ -460,7 +464,7 @@ const PluginTurtleSmooth: NakoPluginObject = {
                 tt = turtlesmooth.getCur()
             }
             const imageUrl = sys.__getSysVar('カメ画像URL')
-            const tid = turtlesmooth.createTurtle(imageUrl)
+            const tid = turtlesmooth.createTurtle(imageUrl, tt.soul.type)
             turtlesmooth.turtles[tid].x = tt.x
             turtlesmooth.turtles[tid].y = tt.y
             turtlesmooth.turtles[tid].dir = tt.dir
@@ -690,10 +694,10 @@ const PluginTurtleSmooth: NakoPluginObject = {
             } else {
                 tt = turtlesmooth.getCur()
             }
-            return tt.dir
+            return (tt.dir + 270) % 360
         }
     },
-    'カメ移動速度設定': { // @カメペンが移動する際の速さをSPD(px/ミリ秒)に設定する // @かめいどうそくどせってい
+    'カメ移動速度設定': { // @カメが移動する際の速さをSPD(px/ミリ秒)に設定する // @かめいどうそくどせってい
         type: 'func',
         josi: [['に', 'へ']],
         pure: true,
@@ -702,7 +706,7 @@ const PluginTurtleSmooth: NakoPluginObject = {
             return turtlesmooth.addJob(new Command.SetMoveSpeed(spd))
         }
     },
-    'カメ回転速度設定': { // @カメペンが回転する際の速さをSPD(度/ミリ秒)に設定する // @かめかいてんそくどせってい
+    'カメ回転速度設定': { // @カメが回転する際の速さをSPD(度/ミリ秒)に設定する // @かめかいてんそくどせってい
         type: 'func',
         josi: [['に', 'へ']],
         pure: true,
@@ -710,6 +714,27 @@ const PluginTurtleSmooth: NakoPluginObject = {
             const turtlesmooth = TurtleSmoothSystem.getTurtleSmooth(sys)
             return turtlesmooth.addJob(new Command.SetRotateSpeed(spd))
         }
+    },
+    'カメスムース移動': { type: 'var', value: true }, // @かめすむーすいどう
+    'カメスムース移動オン': { // @カメが回転・移動する際に途中経過も描画する // @かめすむーすいどうおん
+        type: 'func',
+        josi: [],
+        pure: true,
+        fn: function (sys: NakoSystem): void {
+            const turtlesmooth = TurtleSmoothSystem.getTurtleSmooth(sys)
+            sys.__setSysVar('カメスムース移動', true)
+        },
+        return_none: true
+    },
+    'カメスムース移動オフ': { // @カメが回転・移動する際の途中経過を描画しない // @かめすむーすいどうおふ
+        type: 'func',
+        josi: [],
+        pure: true,
+        fn: function (sys: NakoSystem): void {
+            const turtlesmooth = TurtleSmoothSystem.getTurtleSmooth(sys)
+            sys.__setSysVar('カメスムース移動', false)
+        },
+        return_none: true
     }
 }
 

@@ -22,12 +22,16 @@ export class Runner {
         this.jobStep = 'fetch'
     }
 
+    add (jobs: Animation[]):void {
+        this.jobs.push(...jobs)
+    }
+
     hasJob (): boolean {
         return this.jobs.length > 0 || this.currentJob !== null || this.jobStep !== 'fetch'
     }
 
-    run (time:number):number {
-        while (time > 0 && this.hasJob()) {
+    run (time:number, immediateRunAction: boolean):number {
+        while ((time > 0 || immediateRunAction) && this.hasJob()) {
             switch (this.jobStep) {
             case 'fetch':
                 this.fetch()
@@ -36,7 +40,7 @@ export class Runner {
                 this.setup()
                 break
             case 'tick':
-                time = this.tick(time)
+                time = this.tick(time, immediateRunAction)
                 break
             case 'end':
                 time = this.end(time)
@@ -61,9 +65,13 @@ export class Runner {
         this.jobStep = 'tick'
     }
 
-    private tick (time: number): number {
+    private tick (time: number, immediateRunAction: boolean): number {
         if (!this.currentJob) {
             this.jobStep = 'fetch'
+            return time
+        }
+        if (immediateRunAction) {
+            this.jobStep = 'end'
             return time
         }
         const remainTime = this.currentJob.tick(this.tt, time)

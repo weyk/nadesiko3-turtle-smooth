@@ -43,7 +43,7 @@ export class Rotate extends CommandBase {
             const value = parseFloat(ca[1])
             if (cmd === 'rotR' || cmd === 'rotateR') {
                 return new Rotate(value, 'r')
-            } else if (cmd === 'rptL' || cmd === 'roteteL') {
+            } else if (cmd === 'rotL' || cmd === 'roteteL') {
                 return new Rotate(value, 'l')
             }
         }

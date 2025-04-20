@@ -31,7 +31,7 @@ export class SetStyle extends CommandBase {
         }
         return null
     }
-    
+
     action (tt: TurtleSmooth):void {
         tt.raiseDrawCanvas(this.name, [this.value])
     }

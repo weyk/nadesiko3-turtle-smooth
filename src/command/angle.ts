@@ -1,5 +1,5 @@
 import { CommandBase } from './core.js'
-import { Animation, Rotate as ARotate } from '../animation/animation.js'
+import { Animation, RotateToDir as ARotateToDir } from '../animation/animation.js'
 import { TurtleSmooth } from '../turtle.js'
 
 import type { CommandTarget } from './core.js'
@@ -21,12 +21,12 @@ export class Angle extends CommandBase {
 
     generateAnimationJob (tt: CommandTarget): Animation[] {
         const targetdir = (((this.deg - 90) % 360) + 360) % 360
-        let deg = (targetdir - tt.dir + 360) % 360
-        if (deg > 180) {
-            deg = deg - 360
-        }
-        const dir = deg < 0 ? 'l' : 'r'
-        return [new ARotate(Math.abs(deg), dir)]
+        // let deg = (targetdir - tt.dir + 360) % 360
+        // if (deg > 180) {
+        //     deg = deg - 360
+        // }
+        // const dir = deg < 0 ? 'l' : 'r'
+        return [new ARotateToDir(targetdir)]
     }
 
     static parse (ca: string[]): null|Angle {

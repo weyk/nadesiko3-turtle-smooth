@@ -7,8 +7,6 @@ export interface NakoSystem extends NakoSystemBase {
 
 export type NumericArray2 = [ number, number ]
 
-export type WalkType = 'カメ'|'カニ'|'エビ'|'サメ'
-
 export type LeftOrRight = 'l'|'r'
 export type ForwardOrBackward = 'f'|'b'
 export type Direction = 'f'|'b'|'l'|'r'

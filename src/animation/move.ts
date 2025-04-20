@@ -1,4 +1,5 @@
 import { TurtleSmooth } from '../turtle.js'
+import { DirOpposite, DirToDeg } from '../turtle_const.js'
 import type { AnimationBase, AnimationTarget } from './core.ts'
 import type { NumericArray2, Direction } from '../turtle_type.js'
 
@@ -9,10 +10,9 @@ export class Move implements AnimationBase {
     originPos: NumericArray2
     remain: number
     constructor (len: number, dir: Direction) {
-        const dirOpposite = { 'l': 'r', 'r': 'l', 'f': 'b', 'b': 'f' }
         if (len < 0) {
             len = -len
-            dir = dirOpposite[dir] as Direction
+            dir = DirOpposite[dir]
         }
         this.cmd = 'move'
         this.len = len
@@ -29,10 +29,9 @@ export class Move implements AnimationBase {
     tick (tt: TurtleSmooth, time: number): number {
         const delta = time * tt.spdMove
         if (delta < this.remain) {
-            const dirDeg = { 'l': 270, 'r': 90, 'f': 0, 'b': 180 }
             const direction = this.len < 0 ? -1 : 1
             this.remain -= delta
-            const dir = tt.dir + dirDeg[this.dir]
+            const dir = tt.dir + DirToDeg[this.dir]
             const rad = dir * 0.017453292519943295
             const vp = delta * direction
             const x2 = tt.x + Math.cos(rad) * vp
@@ -50,8 +49,7 @@ export class Move implements AnimationBase {
             time -= Math.floor(this.remain / tt.spdMove)
         }
         this.remain = 0
-        const dirDeg = { 'l': 270, 'r': 90, 'f': 0, 'b': 180 }
-        const dir = tt.dir + dirDeg[this.dir]
+        const dir = tt.dir + DirToDeg[this.dir]
         const rad = dir * 0.017453292519943295
         const vp = this.len
         const x2 = this.originPos[0] + Math.cos(rad) * vp

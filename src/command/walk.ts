@@ -1,5 +1,6 @@
 import { CommandBase } from './core.js'
 import { TurtleSmooth } from '../turtle.js'
+import { DirOpposite, DirToDeg } from '../turtle_const.js'
 import { Animation, Move as AMove } from '../animation/animation.js'
 
 import type { CommandTarget } from './core.js'
@@ -24,8 +25,7 @@ export class Walk extends CommandBase {
         let fdv = this.len
         let dir = this.direction
         if (fdv < 0) {
-            const dirSwap: { [key: string]: Direction } = { 'f': 'b', 'b': 'f', 'l': 'r', 'r': 'l' }
-            dir = dirSwap[dir]
+            dir = DirOpposite[dir]
             fdv = -fdv
         }
         return [new AMove(fdv, dir)]
@@ -62,12 +62,11 @@ export class Walk extends CommandBase {
         }
         return null
     }
-    
+
     action (tt: TurtleSmooth):void {
         const fdv = this.len
         const dir = this.direction
-        const dirDeg = { 'l': 270, 'r': 90, 'f': 0, 'b': 180 }
-        const deg = (tt.dir + dirDeg[dir]) % 360
+        const deg = (tt.dir + DirToDeg[dir]) % 360
         const rad = deg * 0.017453292519943295
         const x2 = tt.x + Math.cos(rad) * fdv
         const y2 = tt.y + Math.sin(rad) * fdv

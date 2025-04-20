@@ -1,7 +1,9 @@
 import { TurtleSmooth } from './turtle.js'
 import { CommandFactory } from './command/factory.js'
+import { SoulType } from './soul/core.js'
+import { SoulFactory } from './soul/factory.js'
 
-import type { NakoSystem, NumericArray2, DrawParams, WalkType } from './turtle_type.js'
+import type { NakoSystem, NumericArray2, DrawParams } from './turtle_type.js'
 import type { Command } from './command/command.js'
 
 interface PenStyle {
@@ -19,6 +21,7 @@ class TurtleSmoothSystem {
     private instanceCount: number
     sys: NakoSystem
     factory: CommandFactory
+    soulFactory: SoulFactory
     canvas: null|HTMLCanvasElement
     ctx: null|CanvasRenderingContext2D
     flagSetTimer: boolean
@@ -40,6 +43,7 @@ class TurtleSmoothSystem {
     constructor (sys: NakoSystem) {
         this.sys = sys
         this.factory = new CommandFactory()
+        this.soulFactory = new SoulFactory()
         this.ctx = null
         this.canvas = null
         this.flagSetTimer = false
@@ -51,6 +55,7 @@ class TurtleSmoothSystem {
         this.turtlePenStyles = []
         this.usePathId = null // パス描画中のカメのID
         this.factory.initRegist()
+        this.soulFactory.initRegist()
     }
 
     clearAll ():void {
@@ -267,10 +272,10 @@ class TurtleSmoothSystem {
         return promise
     }
 
-    runJobAllTurtles (time: number, defaultWait: number, waitForTurteImage: boolean):boolean {
+    runJobAllTurtles (time: number, defaultWait: number, immediateRunAction: boolean, waitForTurteImage: boolean):boolean {
         let hasNext = false
         for (const tt of this.turtles) {
-            hasNext = tt.runJob(time, defaultWait, waitForTurteImage) || hasNext
+            hasNext = tt.runJob(time, defaultWait, immediateRunAction, waitForTurteImage) || hasNext
             if (tt.flagLoaded) { this.drawTurtle(tt.id) }
         }
         return hasNext
@@ -289,17 +294,18 @@ class TurtleSmoothSystem {
         this.lastStart = timestamp
 
         const wait = this.sys.__getSysVar('カメ速度')
-        if (wait <= 0) {
+        const smooth = !!this.sys.__getSysVar('カメスムース移動')
+        if (wait <= 0 && !smooth) {
             // 待ち時間なしで全部実行
             let hasNext = true
             while (hasNext) {
-                hasNext = this.runJobAllTurtles(0, 0, false)
+                hasNext = this.runJobAllTurtles(0, 0, !smooth, false)
             }
         } else {
             // 一つずつ実行
             const waitForTurtleImage = wait > 0
 
-            const hasNext = this.runJobAllTurtles(time, wait, waitForTurtleImage)
+            const hasNext = this.runJobAllTurtles(time, wait, !smooth, waitForTurtleImage)
             if (hasNext) {
                 this.fid = requestAnimationFrame((timestamp) => this.play(timestamp))
                 return
@@ -354,12 +360,12 @@ class TurtleSmoothSystem {
         }
     }
 
-    createTurtle (imageUrl: string, type?: WalkType): number {
+    createTurtle (imageUrl: string, type: SoulType): number {
         // キャンバス情報は毎回参照する (#734)
         this.setupCanvas()
         // カメの情報をリストに追加
         const id = this.turtles.length
-        const tt = new TurtleSmooth(id)
+        const tt = new TurtleSmooth(id, this.soulFactory.getSoul(type))
         this.turtles.push(tt)
         this.turtlePenStyles[id] = {
             lineWidth: 4,
@@ -367,9 +373,6 @@ class TurtleSmoothSystem {
             fillStyle: 'black',
             font: '10px sans-serif',
             down: true
-        }
-        if (type !== undefined) {
-            tt.type = type
         }
         this.target = id
         tt.addEventListener('drawCanvas', (e) => {

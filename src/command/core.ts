@@ -2,6 +2,7 @@ import { Command } from './command.js'
 import { Animation } from '../animation/animation.js'
 import { TurtleSmooth } from '../turtle.js'
 import type { CallbackType } from '../turtle_type.js'
+import type { Soul } from '../soul/soul.js'
 
 export type CanvasPathCommand = 'begin'|'close'
 export type CanvasRawCommand = 'stroke'|'fill'
@@ -27,18 +28,21 @@ export interface CommandTarget {
     dir: number
     spdMove: number
     spdRotate: number
+    soul: Soul
 }
 
 export class CommandBase {
     actionTime: number
     waitTime: number
+    ran: boolean
     resolve: CallbackType<number>
     reject: CallbackType<Error>
     constructor () {
         this.waitTime = 0
         this.actionTime = 0
+        this.ran = false
         this.resolve = (result:number) => {}
-        this.reject = (err:Error) => {}
+        this.reject = (err:Error) => { throw err }
     }
 
     get cmd () {
@@ -57,7 +61,7 @@ export class CommandBase {
         return undefined
     }
 
-    getPromise(): Promise<number> {
+    getPromise (): Promise<number> {
         return new Promise<number>((resolve, reject) => {
             this.resolve = resolve
             this.reject = reject
@@ -67,10 +71,11 @@ export class CommandBase {
     setup (tt: TurtleSmooth, defaultWaitTime: number, immediateRun: boolean):void {
         this.actionTime = Math.floor(defaultWaitTime / 2)
         this.waitTime = defaultWaitTime - this.actionTime
+        this.ran = false
     }
 
     tick (tt: TurtleSmooth, time: number, immediateRun: boolean): number {
-        if (this.actionTime > 0) {
+        if (this.actionTime > 0 || !this.ran) {
             if (time < this.actionTime && !immediateRun) {
                 this.actionTime -= time
                 time = 0
@@ -79,6 +84,7 @@ export class CommandBase {
                     time -= this.actionTime
                 }
                 this.action(tt)
+                this.ran = true
             }
         } else if (this.waitTime > 0) {
             if (time < this.waitTime && !immediateRun) {

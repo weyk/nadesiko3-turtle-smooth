@@ -3,7 +3,7 @@ import { TurtleSmooth } from '../turtle.js'
 import { Animation, Move as AMove, Rotate as ARotate } from '../animation/animation.js'
 
 import type { CommandTarget } from './core.js'
-import type { NumericArray2 } from '../turtle_type.js'
+import type { NumericArray2, Direction, LeftOrRight } from '../turtle_type.js'
 
 export class Move extends CommandBase {
     static cmd = 'mv'
@@ -30,12 +30,33 @@ export class Move extends CommandBase {
         if (deg > 180) {
             deg = deg - 360
         }
-        const dir = deg < 0 ? 'l' : 'r'
+        const fd = tt.soul.getMoveDirection()
+        let lr:LeftOrRight
+        let dir:Direction
+        if (fd === 'lr') {
+            dir = deg < 0 ? 'l' : 'r'
+            deg = Math.abs(deg)
+            if (deg < 90) {
+                lr = dir === 'l' ? 'r' : 'l'
+                deg = 90 - deg
+            } else {
+                lr = dir
+                deg = deg - 90
+            }
+        } else if (fd === 'b') {
+            lr = deg < 0 ? 'r' : 'l'
+            deg = 180 - Math.abs(deg)
+            dir = 'b'
+        } else {
+            lr = deg < 0 ? 'l' : 'r'
+            deg = Math.abs(deg)
+            dir = 'f'
+        }
         // カメの移動距離を算出
         const fdv = Math.sqrt(dx * dx + dy * dy)
         return [
-            new ARotate(Math.abs(deg), dir),
-            new AMove(fdv, 'f')
+            new ARotate(deg, lr),
+            new AMove(fdv, dir)
         ]
     }
 

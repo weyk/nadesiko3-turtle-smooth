@@ -16,7 +16,7 @@ export class Jump extends CommandBase {
         return new Jump([parseFloat(ca[1]), parseFloat(ca[2])])
     }
 
-    action (tt: TurtleSmooth) {
+    action (tt: TurtleSmooth):void {
         // 起点を移動する
         tt.x = this.p[0]
         tt.y = this.p[1]

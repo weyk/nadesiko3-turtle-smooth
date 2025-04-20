@@ -21,7 +21,7 @@ export class SetImage extends CommandBase {
         }
     }
 
-    action() {
+    action (tt: TurtleSmooth):void {
         // none
     }
 }

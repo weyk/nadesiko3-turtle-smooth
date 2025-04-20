@@ -1,13 +1,14 @@
 {
   "name": "nadesiko3-turtle-smooth",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Smooth turtle graphics for nadesiko3",
   "type": "module",
   "main": "lib/plugin_turtle_smooth.js",
   "scripts": {
     "start": "node demo/index_lite.js",
     "test": "node --test",
-    "build": "tsc && rollup -c",
+    "build": "tsc && rollup -c && npm run afterBuild",
+    "afterBuild": "node tmp/js/tools/copycomments.js",
     "tsc": "tsc --watch",
     "eslint": "eslint src/*.ts",
     "eslint:fix": "eslint . --ext ts --fix"

@@ -1,6 +1,7 @@
 import * as Command from './command/command.js'
+import { Soul } from './soul/soul.js'
 import { Runner as CommandRunner } from './command/runner.js'
-import type { NumericArray2, DrawParams, LeftOrRight, Direction, WalkType, CallbackType } from './turtle_type.js'
+import type { NumericArray2, DrawParams, LeftOrRight, Direction, CallbackType } from './turtle_type.js'
 import type { CanvasRect } from './turtle_system.js'
 import type { AnimationTarget } from './animation/core.js'
 
@@ -41,7 +42,7 @@ class TurtleSmooth extends TypedTurtleSmoothEventTarget implements AnimationTarg
     img: null | HTMLImageElement
     canvas: null | HTMLCanvasElement
     ctx: null | CanvasRenderingContext2D
-    type: WalkType
+    soul: Soul
     dir: number
     x: number
     y: number
@@ -58,13 +59,13 @@ class TurtleSmooth extends TypedTurtleSmoothEventTarget implements AnimationTarg
     jobRunner: CommandRunner
     jobWait: number
 
-    constructor (id: number) {
+    constructor (id: number, soul: Soul) {
         super()
         this.id = id
         this.img = null
         this.canvas = null
+        this.soul = soul
         this.ctx = null
-        this.type = 'カメ'
         this.dir = 270 // 上向き
         this.iw = 32
         this.ih = 32
@@ -172,87 +173,21 @@ class TurtleSmooth extends TypedTurtleSmoothEventTarget implements AnimationTarg
     }
 
     addCommand (command: Command.Command): Promise<number> {
-        this.typeValidation(command)
+        this.soul.walkValidation(command)
         return this.jobRunner.add(command)
     }
 
-    runJob (time: number, defaultWait: number, waitForTurteImage: boolean): boolean {
+    runJob (time: number, defaultWait: number, immediateRunAction: boolean, waitForTurteImage: boolean): boolean {
         if (!this.flagLoaded && waitForTurteImage) {
             // console.log('[TURTLE] waiting ...')
             return true
         }
-        const immediateRun = defaultWait === 0
+        const immediateRun = defaultWait <= 0
         // 以下の２つの条件を満たしている間ループする。
         // 即時実行であるか、即時実行ではない場合は経過時間の残りがあること。
         // 未処理のJOBが残っているか、処理中のJOBがあること。
-        time = this.jobRunner.run(time, defaultWait, immediateRun)
+        time = this.jobRunner.run(time, defaultWait, immediateRun, immediateRunAction)
         return (this.jobRunner.hasJob())
-    }
-
-    typeValidation (cmd: Command.Command): void {
-        switch (this.type) {
-        case 'カメ': {
-            if (cmd instanceof Command.Walk) {
-                if (cmd.direction === 'r' || cmd.direction === 'l') {
-                    throw new Error(`${this.type}はその方向に進むことはできません`)
-                }
-            }
-            if (cmd instanceof Command.Curve) {
-                if (cmd.dir === 'l' || cmd.dir === 'r') {
-                    throw new Error(`${this.type}はその方向に進むことはできません`)
-                }
-            }
-            break
-        }
-        case 'カニ': {
-            if (cmd instanceof Command.Walk) {
-                if (cmd.direction === 'f' || cmd.direction === 'b') {
-                    throw new Error(`${this.type}はその方向に進むことはできません`)
-                }
-            }
-            if (cmd instanceof Command.Curve) {
-                if (cmd.dir === 'f' || cmd.dir === 'b') {
-                    throw new Error(`${this.type}はその方向に進むことはできません`)
-                }
-            }
-            break
-        }
-        case 'エビ': {
-            if (cmd instanceof Command.Walk) {
-                if (cmd.direction === 'f' || cmd.direction === 'r' || cmd.direction === 'l') {
-                    throw new Error(`${this.type}はその方向に進むことはできません`)
-                }
-            }
-            if (cmd instanceof Command.Curve) {
-                if (cmd.dir === 'f' || cmd.dir === 'l' || cmd.dir === 'r') {
-                    throw new Error(`${this.type}はその方向に進むことはできません`)
-                }
-            }
-            break
-        }
-        case 'サメ': {
-            if (cmd instanceof Command.Walk) {
-                if (cmd.direction === 'b' || cmd.direction === 'r' || cmd.direction === 'l') {
-                    throw new Error(`${this.type}はその方向に進むことはできません`)
-                }
-            }
-            if (cmd instanceof Command.Rotate) {
-                throw new Error(`${this.type}はその方法での方向転換はできません`)
-            }
-            if (cmd instanceof Command.Angle && !cmd.direct) {
-                throw new Error(`${this.type}はその方法での方向転換はできません`)
-            }
-            if (cmd instanceof Command.Move && !cmd.direct) {
-                throw new Error(`${this.type}はその方法での方向転換を含む移動はできません`)
-            }
-            if (cmd instanceof Command.Curve) {
-                if (cmd.dir === 'b' || cmd.dir === 'l' || cmd.dir === 'r') {
-                    throw new Error(`${this.type}はその方向に進むことはできません`)
-                }
-            }
-            break
-        }
-        }
     }
 
     raiseImageChangede (): void {

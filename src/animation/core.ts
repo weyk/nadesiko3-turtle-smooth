@@ -1,6 +1,6 @@
 import { TurtleSmooth } from '../turtle.js'
 
-export type AnimationCmd = 'move'|'rotate'|'curve'
+export type AnimationCmd = 'move'|'rotate'|'curve'|'rotateto'|'moveto'
 
 export interface AnimationBase {
     cmd: AnimationCmd
